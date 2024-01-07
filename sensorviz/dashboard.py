@@ -3,6 +3,8 @@
 import smbus2
 import time
 import csv
+import datetime
+import os
 
 from dash import Dash, html, dcc, callback, Output, Input
 import pandas as pd
@@ -16,10 +18,6 @@ T_LOW_REG = 0x02
 T_HIGH_REG = 0x03
 res = 0.0625
 bus = smbus2.SMBus(DEVICE_BUS)
-
-# CSV file setup
-csv_filename = 'temp102-data.csv'
-csv_header = ['Timestamp', 'Temperature (°C)']
 
 tmp102_df = pd.DataFrame({'Timestamp': [''], 'Temperature': ['']})
 
@@ -63,7 +61,7 @@ def read_sensor():
         print(f"Temperature: {temperature:.2f} °C")
 
         # Write data to CSV file
-        with open(csv_filename, 'a', newline='') as csv_file:
+        with open(data_csv_file_loc, 'a', newline='') as csv_file:
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow([timestamp, temperature])
 
@@ -77,5 +75,19 @@ def start_server():
     app.run_server(debug=True)
 
 if __name__ == '__main__':
-    start_time = time.time()        
+    start_time = time.time()
+
+    # CSV file setup
+    data_dir_name = "data"
+    data_subdir = f'{os.getcwd()}/{data_dir_name}'
+    if not os.path.exists(data_subdir):
+            print(f'creating dir: {data_subdir}')
+            os.makedirs(data_subdir)
+
+    data_csv_filename = "{}-tmp102.csv".format(datetime.datetime.now().strftime('%y-%m-%d-%X'))
+    data_csv_file_loc = f'{data_subdir}/{data_csv_filename}'
+    with open(data_csv_file_loc, 'a', newline='') as csv_file:
+            csv_writer = csv.writer(csv_file)
+            csv_writer.writerow(['Timestamp', 'Temperature (°C)'])
+
     app.run_server(debug=True)

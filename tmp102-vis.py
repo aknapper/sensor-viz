@@ -4,9 +4,10 @@ import smbus2
 import time
 import csv
 import matplotlib.pyplot as plt
-
 import logging
 import threading
+import datetime
+import os
 
 DEVICE_BUS = 1
 TMP102_ADDRESS = 0x48
@@ -26,10 +27,6 @@ ax.set_xlabel('Time (s)')
 ax.set_ylabel('Temperature (°C)')
 ax.legend()
 
-# CSV file setup
-csv_filename = 'temp102-data.csv'
-csv_header = ['Timestamp', 'Temperature (°C)']
-
 def read_temperature():
     # Read the temperature register (2 bytes)
     temperature_data = bus.read_i2c_block_data(TMP102_ADDRESS, TEMP_REG, 2)
@@ -41,6 +38,20 @@ def read_temperature():
 def get_data():
     try:
         start_time = time.time()
+
+        # CSV file setup
+        data_dir_name = "data"
+        data_subdir = f'{os.getcwd()}/{data_dir_name}'
+        if not os.path.exists(data_subdir):
+             print(f'creating dir: {data_subdir}')
+             os.makedirs(data_subdir)
+
+        data_csv_filename = "{}-tmp102.csv".format(datetime.datetime.now().strftime('%y-%m-%d-%X'))
+        data_csv_file_loc = f'{data_subdir}/{data_csv_filename}'
+        with open(data_csv_file_loc, 'a', newline='') as csv_file:
+                csv_writer = csv.writer(csv_file)
+                csv_writer.writerow(['Timestamp', 'Temperature (°C)'])
+
         while True:
             timestamp = time.time() - start_time
             temperature = read_temperature()
@@ -55,7 +66,7 @@ def get_data():
             ax.autoscale_view()
 
             # Write data to CSV file
-            with open(csv_filename, 'a', newline='') as csv_file:
+            with open(data_csv_file_loc, 'a', newline='') as csv_file:
                 csv_writer = csv.writer(csv_file)
                 csv_writer.writerow([timestamp, temperature])
 
