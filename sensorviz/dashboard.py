@@ -19,16 +19,14 @@ T_HIGH_REG = 0x03
 res = 0.0625
 bus = smbus2.SMBus(DEVICE_BUS)
 
+class SensorViz:
+    def __init__ (self):
+        self.dashboard = Dash(__name__)
+
+    def start_server(self):
+        self.dashboard.run_server(debug=True)        
+
 tmp102_df = pd.DataFrame({'Timestamp': [''], 'Temperature': ['']})
-
-app = Dash(__name__)
-
-app.layout = html.Div(children=[
-    html.H1(children='Sensorviz'),
-    html.H1(children="tmp102"),
-    dcc.Graph(figure={}, id="tmp102-data"),
-    dcc.Interval(id="interval-component", interval=1000 * 1, n_intervals=0),
-])
 
 @callback(
     Output(component_id="tmp102-data", component_property="figure"),
@@ -71,9 +69,6 @@ def read_sensor():
         # Close the SMBus connection when the program is interrupted
         bus.close()
 
-def start_server():
-    app.run_server(debug=True)
-
 if __name__ == '__main__':
     start_time = time.time()
 
@@ -90,4 +85,13 @@ if __name__ == '__main__':
             csv_writer = csv.writer(csv_file)
             csv_writer.writerow(['Timestamp', 'Temperature (°C)'])
 
-    app.run_server(debug=True)
+    app = SensorViz()
+
+    app.dashboard.layout = html.Div(children=[
+        html.H1(children='Sensorviz'),
+        html.H1(children="tmp102"),
+        dcc.Graph(figure={}, id="tmp102-data"),
+        dcc.Interval(id="interval-component", interval=1000 * 1, n_intervals=0),
+        ])
+    
+    app.start_server()
