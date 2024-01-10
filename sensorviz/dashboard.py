@@ -5,6 +5,7 @@ import time
 import csv
 import datetime
 import os
+import logging
 
 from dash import Dash, html, dcc, callback, Output, Input
 import pandas as pd
@@ -47,6 +48,7 @@ def update_line_chart(n_intervals):
 def read_temperature():
     # Read the temperature register (2 bytes)
     temperature_data = bus.read_i2c_block_data(TMP102_ADDRESS, TEMP_REG, 2)
+    logging.info("tmp102 i2c temperature read.")
     # Combine the two bytes to get the 12-bit temperature value
     raw_temperature = (temperature_data[0] << 4) | (temperature_data[1] >> 4)
     # Convert the raw temperature value to Celsius
@@ -59,9 +61,7 @@ def read_sensor():
         print(f"Temperature: {temperature:.2f} °C")
 
         # Write data to CSV file
-        with open(data_csv_file_loc, 'a', newline='') as csv_file:
-            csv_writer = csv.writer(csv_file)
-            csv_writer.writerow([timestamp, temperature])
+        append_row_to_csv(data_csv_file_loc, timestamp, temperature)
 
         return timestamp, temperature
 
@@ -69,21 +69,17 @@ def read_sensor():
         # Close the SMBus connection when the program is interrupted
         bus.close()
 
-if __name__ == '__main__':
-    start_time = time.time()
+def append_row_to_csv(file_loc, timestamp, data):
+    logging.info(f"data written to {file_loc}.")
+    with open(file_loc, 'a', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file)
+        csv_writer.writerow([timestamp, data])
 
-    # CSV file setup
-    data_dir_name = "data"
-    data_subdir = f'{os.getcwd()}/{data_dir_name}'
-    if not os.path.exists(data_subdir):
-            print(f'creating dir: {data_subdir}')
-            os.makedirs(data_subdir)
-
-    data_csv_filename = "{}-tmp102.csv".format(datetime.datetime.now().strftime('%y-%m-%d-%X'))
-    data_csv_file_loc = f'{data_subdir}/{data_csv_filename}'
-    with open(data_csv_file_loc, 'a', newline='') as csv_file:
-            csv_writer = csv.writer(csv_file)
-            csv_writer.writerow(['Timestamp', 'Temperature (°C)'])
+def main():
+    # # turn on for info logging verbosity
+    # format = "%(asctime)s: %(message)s"
+    # logging.basicConfig(format=format, level=logging.INFO,
+    #                     datefmt="%H:%M:%S")
 
     app = SensorViz()
 
@@ -95,3 +91,17 @@ if __name__ == '__main__':
         ])
     
     app.start_server()
+
+if __name__ == '__main__':
+    start_time = time.time()
+
+    # CSV file setup
+    data_dir_name = "data"
+    data_subdir = f'{os.getcwd()}/{data_dir_name}'
+    if not os.path.exists(data_subdir):
+        os.makedirs(data_subdir)
+    data_csv_filename = "{}-tmp102.csv".format(datetime.datetime.now().strftime('%y-%m-%d-%X'))
+    data_csv_file_loc = f'{data_subdir}/{data_csv_filename}'
+    append_row_to_csv(data_csv_file_loc, 'Timestamp', 'Temperature (°C)')
+
+    main()
