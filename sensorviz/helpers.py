@@ -2,8 +2,23 @@ import csv
 import logging
 import os
 import datetime
+import argparse
 
 import globals
+
+def cli_init():
+    parser = argparse.ArgumentParser(
+        prog='Sensorviz',
+        description='Fast data visualization of embedded sensors.',
+        epilog='This is the way.')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Enable verbose mode')
+    args = parser.parse_args()
+    verbose = args.verbose
+
+    if verbose:
+        format = "%(asctime)s: %(message)s"
+        logging.basicConfig(format=format, level=logging.INFO,
+                            datefmt="%H:%M:%S")
 
 def append_row_to_csv(file_loc, timestamp, data):
     logging.info(f"data written to {file_loc}.")

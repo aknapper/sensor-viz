@@ -4,7 +4,7 @@ import time
 
 from dash import Dash
 from dashboard import setup_dashboard
-from helpers import setup_data_file
+from helpers import setup_data_file, cli_init
 
 import globals
 
@@ -16,10 +16,7 @@ class SensorViz:
         self.dashboard.run_server(debug=True)
 
 def main():
-    # # turn on for info logging verbosity
-    # format = "%(asctime)s: %(message)s"
-    # logging.basicConfig(format=format, level=logging.INFO,
-    #                     datefmt="%H:%M:%S")
+    cli_init()
 
     globals.start_time = time.time()
 
