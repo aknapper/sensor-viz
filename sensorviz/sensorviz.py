@@ -17,7 +17,6 @@ class SensorViz:
 
 def main():
     cli_init()
-
     globals.start_time = time.time()
 
     setup_data_file("data", "tmp102", "Temperature (°C)")

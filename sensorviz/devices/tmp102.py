@@ -26,15 +26,16 @@ def read_temperature():
 def tmp102_read():
     try:
         from globals import start_time, data_csv_file_loc
-        timestamp = time.time() - start_time
+        runtime = time.time() - start_time
+        timestamp = time.strftime("%H:%M:%S", time.localtime())
         temperature = read_temperature()
         print(f"Temperature: {temperature:.2f} °C")
 
         # Write data to CSV file
         file_loc = data_csv_file_loc
-        append_row_to_csv(file_loc, timestamp, temperature)
+        append_row_to_csv(file_loc, timestamp, runtime, temperature)
 
-        return timestamp, temperature
+        return timestamp, runtime, temperature
 
     except KeyboardInterrupt:
         # Close the SMBus connection when the program is interrupted
