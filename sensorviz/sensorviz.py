@@ -2,28 +2,44 @@
 
 import time
 
-from dash import Dash
-from dashboard import setup_dashboard
-from helpers import setup_data_file, cli_init
-
-import globals
+from dash import Dash, dcc, html
+import devices.tmp102.dashboard as dashboard
+from helpers import cli_init
 
 class SensorViz:
     def __init__ (self):
         self.dashboard = Dash(__name__)
+        self.app_start_time = time.time()
 
     def start_server(self):
         self.dashboard.run_server(debug=True)
 
+
+layout2 = html.Div([
+    html.H2(children='layout2 test data')
+])
+
+
 def main():
     cli_init()
-    globals.start_time = time.time()
-
-    setup_data_file("data", "tmp102", "Temperature (°C)")
 
     app = SensorViz()
 
-    setup_dashboard(app.dashboard)
+    app.dashboard.layout = html.Div([
+        html.H1(children='Sensorviz'),
+        dcc.Tabs([
+            dcc.Tab(label='TMP102', children=dashboard.tmp102_layout),
+            dcc.Tab(label='Layout2', children=layout2),
+            dcc.Tab(label='Layout3', children=layout2),
+            dcc.Tab(label='Layout4', children=layout2),
+            dcc.Tab(label='Layout5', children=layout2),
+            dcc.Tab(label='Layout6', children=layout2),
+            dcc.Tab(label='Layout7', children=layout2),
+            dcc.Tab(label='Layout8', children=layout2),
+            dcc.Tab(label='Layout9', children=layout2),
+            dcc.Tab(label='Layout0', children=layout2),
+        ])
+    ])
 
     app.start_server()
 
