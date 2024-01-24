@@ -18,11 +18,11 @@ def cli_init():
         logging.basicConfig(format=format, level=logging.INFO,
                             datefmt="%H:%M:%S")
 
-def append_row_to_csv(file_loc, timestamp, runtime, temp):
+def append_row_to_csv(file_loc, timestamp, runtime, dataType):
     logging.info(f"data written to {file_loc}.")
     with open(file_loc, 'a', newline='') as csv_file:
         csv_writer = csv.writer(csv_file)
-        csv_writer.writerow([timestamp, runtime, temp])
+        csv_writer.writerow([timestamp, runtime, dataType])
 
 def setup_data_file(device_name, datatype, folder_name="data"):
     # CSV data store file setup
@@ -31,5 +31,5 @@ def setup_data_file(device_name, datatype, folder_name="data"):
         os.makedirs(data_subdir)
     data_csv_filename = "{}-{}".format(datetime.datetime.now().strftime('%y-%m-%d-%X'), device_name)
     data_csv_file_loc = f'{data_subdir}/{data_csv_filename}'
-    append_row_to_csv(data_csv_file_loc, 'Timestamp', 'runtime(s)', datatype)
+    append_row_to_csv(data_csv_file_loc, 'Timestamp', 'Runtime (s)', datatype)
     return data_csv_file_loc

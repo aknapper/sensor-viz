@@ -31,7 +31,7 @@ def update_line_chart(n_intervals, axisSeries):
         # Read data from I2C device
         tmp102_dev.temp_data_capture()
 
-    fig = px.line(tmp102_dev.dataFrame, x=axisSeries, y="Temperature (°C)", title="TMP102 Data")
+    fig = px.line(tmp102_dev.dataFrame, x=axisSeries, y=tmp102_dev.sampleData[0], title="TMP102 Data")
     return fig
 
 # tmp102 layout

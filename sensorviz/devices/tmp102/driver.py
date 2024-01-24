@@ -13,11 +13,12 @@ res = 0.0625
 
 class TMP102(Device):
     def __init__(self, dev_name, bus_num, address):
-        super().__init__(dev_name)
         self.bus_num = bus_num
         self.bus = smbus2.SMBus(self.bus_num)
         self.address = address
         self.data_capture_start_time = 0
+        self.sampleData = ("Temperature (°C)")
+        super().__init__(dev_name, self.sampleData)
 
     def get_temperature(self):
         # Read the temperature register (2 bytes)
@@ -42,7 +43,7 @@ class TMP102(Device):
             append_row_to_csv(self.csvFileLoc, timestamp, runtime, temperature)
 
             # Append data to Pandas DataFrame
-            newData = pd.DataFrame({"Timestamp": [timestamp], "Runtime (s)": [runtime],"Temperature (°C)": [temperature]})
+            newData = pd.DataFrame({"Timestamp": [timestamp], "Runtime (s)": [runtime],self.sampleData[0]: [temperature]})
             self.dataFrame = pd.concat([self.dataFrame, newData], ignore_index=True)
 
         except KeyboardInterrupt:
