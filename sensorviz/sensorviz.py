@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import time
-
 from dash import Dash, dcc, html
 import devices.tmp102.dashboard as dashboard
 from helpers import cli_init
@@ -19,14 +18,13 @@ layout2 = html.Div([
     html.H2(children='layout2 test data')
 ])
 
-
 def main():
     cli_init()
 
     app = SensorViz()
 
     app.dashboard.layout = html.Div([
-        html.H1(children='Sensorviz'),
+        html.Header(children='Sensorviz', style={"font-size": "30px", "textAlign": "center"}),
         dcc.Tabs([
             dcc.Tab(label='TMP102', children=dashboard.tmp102_layout),
             dcc.Tab(label='Layout2', children=layout2),
