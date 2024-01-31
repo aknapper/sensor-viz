@@ -35,7 +35,6 @@ def startstop_sampling(start, stop):
 def update_line_chart(n_intervals, axisSeries):
     df = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''], tmp102_dev.sampleData[0]: ['']})
     df = pd.read_csv(tmp102_dev.csvFileLoc)
-    # print(df)
     fig = px.line(df, x=axisSeries, y=tmp102_dev.sampleData, title="TMP102 Data")
     return fig
 

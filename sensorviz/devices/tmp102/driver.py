@@ -17,11 +17,10 @@ class TMP102:
         self.csvFileLoc = setup_data_file(dev_name, self.sampleData)
         self.dataFrame = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''], self.sampleData[0]: ['']})
         self.logProcess = Process(target=self.dataLoggerCallback)
-        self.logQueue = Queue()
+        self.logTimeQueue = Queue()
         self.bus_num = bus_num
         self.bus = smbus2.SMBus(self.bus_num)
         self.address = address
-        self.data_capture_start_time = 0
         self.logFreq = 1
 
     def get_temperature(self):
@@ -35,9 +34,7 @@ class TMP102:
 
     def temp_data_capture(self):
         try:
-            # if self.data_capture_start_time == 0:
-            #     self.data_capture_start_time = time.time()
-            start_time = self.logQueue.get()
+            start_time = self.logTimeQueue.get()
             runtime = time.time() - start_time
             timestamp = time.strftime("%H:%M:%S", time.localtime())
             
@@ -51,7 +48,7 @@ class TMP102:
             newData = pd.DataFrame({"Timestamp": [timestamp], "Runtime (s)": [runtime],self.sampleData[0]: [temperature]})
             self.dataFrame = pd.concat([self.dataFrame, newData], ignore_index=True)
 
-            self.logQueue.put(start_time)
+            self.logTimeQueue.put(start_time)
 
         except KeyboardInterrupt:
             # Close the SMBus connection when the program is interrupted
@@ -60,10 +57,7 @@ class TMP102:
     def dataLoggerCallback(self):
         while True:
             if self.logProcess.is_alive():
-                if self.logQueue.empty():
-                    self.logQueue.put(time.time())
+                if self.logTimeQueue.empty():
+                    self.logTimeQueue.put(time.time())
                 self.temp_data_capture()            
             time.sleep(self.logFreq)
-
-    def getDataframe(self):
-        return self.dataFrame
