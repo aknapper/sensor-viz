@@ -1,23 +1,25 @@
 import time
 import logging
 from multiprocessing import Process, Queue
+
+from helpers import append_row_to_csv, setup_data_file
+
 import smbus2
 import pandas as pd
-from helpers import append_row_to_csv, setup_data_file
 
 TEMP_REG = 0x00
 CONFIG_REG = 0x01
 T_LOW_REG = 0x02
 T_HIGH_REG = 0x03
-res = 0.0625 
+RESOLUTION = 0.0625 
 
 class TMP102:
     def __init__(self, dev_name, bus_num, address):
         self.sampleData = ("Temperature (°C)")
         self.csvFileLoc = setup_data_file(dev_name, self.sampleData)
         self.dataFrame = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''], self.sampleData[0]: ['']})
-        self.logProcess = Process(target=self.dataLoggerCallback)
-        self.logTimeQueue = Queue()
+        self.dataLogProc = Process(target=self.dataLoggerCallback)
+        self.dataLogTimeQueue = Queue()
         self.bus_num = bus_num
         self.bus = smbus2.SMBus(self.bus_num)
         self.address = address
@@ -30,11 +32,11 @@ class TMP102:
         # Combine the two bytes to get the 12-bit temperature value
         raw_temperature = (temperature_data[0] << 4) | (temperature_data[1] >> 4)
         # Convert the raw temperature value to Celsius
-        return raw_temperature * res
+        return raw_temperature * RESOLUTION
 
     def temp_data_capture(self):
         try:
-            start_time = self.logTimeQueue.get()
+            start_time = self.dataLogTimeQueue.get()
             runtime = time.time() - start_time
             timestamp = time.strftime("%H:%M:%S", time.localtime())
             
@@ -48,7 +50,7 @@ class TMP102:
             newData = pd.DataFrame({"Timestamp": [timestamp], "Runtime (s)": [runtime],self.sampleData[0]: [temperature]})
             self.dataFrame = pd.concat([self.dataFrame, newData], ignore_index=True)
 
-            self.logTimeQueue.put(start_time)
+            self.dataLogTimeQueue.put(start_time)
 
         except KeyboardInterrupt:
             # Close the SMBus connection when the program is interrupted
@@ -56,8 +58,8 @@ class TMP102:
     
     def dataLoggerCallback(self):
         while True:
-            if self.logProcess.is_alive():
-                if self.logTimeQueue.empty():
-                    self.logTimeQueue.put(time.time())
+            if self.dataLogProc.is_alive():
+                if self.dataLogTimeQueue.empty():
+                    self.dataLogTimeQueue.put(time.time())
                 self.temp_data_capture()            
             time.sleep(self.logFreq)

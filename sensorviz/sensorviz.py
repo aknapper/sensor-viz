@@ -29,13 +29,6 @@ def main():
             dcc.Tab(label='TMP102', children=dashboard.tmp102_layout),
             dcc.Tab(label='Layout2', children=layout2),
             dcc.Tab(label='Layout3', children=layout2),
-            dcc.Tab(label='Layout4', children=layout2),
-            dcc.Tab(label='Layout5', children=layout2),
-            dcc.Tab(label='Layout6', children=layout2),
-            dcc.Tab(label='Layout7', children=layout2),
-            dcc.Tab(label='Layout8', children=layout2),
-            dcc.Tab(label='Layout9', children=layout2),
-            dcc.Tab(label='Layout0', children=layout2),
         ])
     ])
 
