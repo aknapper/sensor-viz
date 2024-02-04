@@ -2,7 +2,8 @@
 
 import time
 from dash import Dash, dcc, html
-import devices.tmp102.dashboard as dashboard
+import devices.tmp102.dashboard as tmp102dashboard
+import devices.scd30.dashboard as scd30dashboard
 from helpers import cli_init
 
 class SensorViz:
@@ -26,8 +27,8 @@ def main():
     app.dashboard.layout = html.Div([
         html.Header(children='Sensorviz', style={"font-size": "30px", "textAlign": "center"}),
         dcc.Tabs([
-            dcc.Tab(label='TMP102', children=dashboard.tmp102_layout),
-            dcc.Tab(label='Layout2', children=layout2),
+            dcc.Tab(label='TMP102', children=tmp102dashboard.tmp102_layout),
+            dcc.Tab(label='SCD30', children=scd30dashboard.scd30_layout),
             dcc.Tab(label='Layout3', children=layout2),
         ])
     ])
