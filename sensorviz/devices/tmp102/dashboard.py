@@ -1,5 +1,3 @@
-from multiprocessing import Process
-
 from devices.tmp102.driver import TMP102
 
 from dash import html, dcc, callback, Output, Input, ctx
@@ -20,12 +18,11 @@ tmp102_dev = TMP102(dev_name="tmp102-1", bus_num=1, address=0x48)
 def startstop_sampling(start, stop):
     if 'start_btn' in ctx.triggered_id:
         if not tmp102_dev.dataLogProc.is_alive():
-            tmp102_dev.dataLogProc.start()
+            tmp102_dev.initProc()
         return 'Recording started...', 'Stop recording'
     elif 'stop_btn' in ctx.triggered_id:
         if tmp102_dev.dataLogProc.is_alive():
-            tmp102_dev.dataLogProc.terminate()
-            tmp102_dev.dataLogProc = Process(target=tmp102_dev.dataLoggerCallback)
+            tmp102_dev.resetProc()
         return 'Start recording', 'Recording stopped...'
 
 # Callback for updating graph based at fixed interval and on new x-asix selection
@@ -45,7 +42,7 @@ def update_graph(n_intervals, axisSeries):
     Input("sample_rate", "value"),
 )
 def sync_input(sample_rate):
-    tmp102_dev.logFreq = sample_rate/1000
+    tmp102_dev.dataLogFreq = sample_rate/1000
     return sample_rate
 
 # tmp102 layout

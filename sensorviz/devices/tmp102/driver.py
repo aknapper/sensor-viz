@@ -18,12 +18,14 @@ class TMP102:
         self.sampleData = ("Temperature (°C)")
         self.csvFileLoc = setup_data_file(dev_name, self.sampleData)
         self.dataFrame = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''], self.sampleData[0]: ['']})
-        self.dataLogProc = Process(target=self.dataLoggerCallback)
-        self.dataLogTimeQueue = Queue()
         self.bus_num = bus_num
         self.bus = smbus2.SMBus(self.bus_num)
         self.address = address
-        self.logFreq = 1
+
+        # process info
+        self.dataLogFreq = 1
+        self.dataLogTimeQueue = Queue()
+        self.dataLogProc = Process(target=self.dataLogCallback)
 
     def get_temperature(self):
         # Read the temperature register (2 bytes)
@@ -49,17 +51,24 @@ class TMP102:
             # Append data to Pandas DataFrame
             newData = pd.DataFrame({"Timestamp": [timestamp], "Runtime (s)": [runtime],self.sampleData[0]: [temperature]})
             self.dataFrame = pd.concat([self.dataFrame, newData], ignore_index=True)
-
             self.dataLogTimeQueue.put(start_time)
 
         except KeyboardInterrupt:
             # Close the SMBus connection when the program is interrupted
             self.bus.close()
-    
-    def dataLoggerCallback(self):
+
+    def dataLogCallback(self):
         while True:
             if self.dataLogProc.is_alive():
                 if self.dataLogTimeQueue.empty():
                     self.dataLogTimeQueue.put(time.time())
-                self.temp_data_capture()            
-            time.sleep(self.logFreq)
+                self.temp_data_capture()
+            time.sleep(self.dataLogFreq)
+
+    def initProc(self):
+        self.dataLogProc.start()
+
+    def resetProc(self):
+        self.dataLogProc.terminate()
+        self.dataLogProc = Process(target=self.dataLogCallback)
+
