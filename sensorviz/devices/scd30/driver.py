@@ -11,9 +11,12 @@ from sensirion_i2c_scd30.device import Scd30Device
 
 class SCD30:
     def __init__(self, dev_name):
-        self.sampleData = ("CO2 Concentration (ppm)")
+        self.sampleData = ["CO2 Concentration (ppm)","Temperature (°C)","Relative Humidity (%)"]
         self.csvFileLoc = setup_data_file(dev_name, self.sampleData)
-        self.dataFrame = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''], self.sampleData[0]: ['']})
+        self.dataFrame = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''],
+                                       self.sampleData[0]: [''],
+                                       self.sampleData[1]: [''],
+                                       self.sampleData[2]: ['']})
 
         # process info
         self.dataLogFreq = 2
@@ -43,10 +46,14 @@ class SCD30:
         print(f"humidity {humidity:.2f} %RH\n")
 
         # Write data to CSV file
-        append_row_to_csv(self.csvFileLoc, timestamp, runtime, co2_concentration)
+        append_row_to_csv(self.csvFileLoc,
+                          [timestamp, runtime, co2_concentration, temperature, humidity])
 
         # Append data to Pandas DataFrame
-        newData = pd.DataFrame({"Timestamp": [timestamp], "Runtime (s)": [runtime],self.sampleData[0]: [co2_concentration]})
+        newData = pd.DataFrame({"Timestamp": [timestamp], "Runtime (s)": [runtime],
+                                self.sampleData[0]: [co2_concentration],
+                                self.sampleData[1]: [temperature],
+                                self.sampleData[2]: [humidity]})
         self.dataFrame = pd.concat([self.dataFrame, newData], ignore_index=True)
         self.dataLogTimeQueue.put(start_time)
 

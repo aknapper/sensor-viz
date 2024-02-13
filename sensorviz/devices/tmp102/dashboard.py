@@ -1,7 +1,7 @@
 from devices.tmp102.driver import TMP102
 
 from dash import html, dcc, callback, Output, Input, ctx
-import plotly.express as px
+import plotly.express
 import pandas as pd
 
 TMP102_GRAPH_REFRESH_MS = 1000       # graph refresh rate (ms)
@@ -34,7 +34,7 @@ def startstop_sampling(start, stop):
 def update_graph(n_intervals, axisSeries):
     df = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''], tmp102_dev.sampleData[0]: ['']})
     df = pd.read_csv(tmp102_dev.csvFileLoc)
-    fig = px.line(df, x=axisSeries, y=tmp102_dev.sampleData, title="TMP102 Data")
+    fig = plotly.express.line(df, x=axisSeries, y=tmp102_dev.sampleData[0], title="TMP102 Data")
     return fig
 
 @callback(

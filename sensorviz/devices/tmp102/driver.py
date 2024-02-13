@@ -15,9 +15,10 @@ RESOLUTION = 0.0625
 
 class TMP102:
     def __init__(self, dev_name, bus_num, address):
-        self.sampleData = ("Temperature (°C)")
+        self.sampleData = ["Temperature (°C)"]
         self.csvFileLoc = setup_data_file(dev_name, self.sampleData)
-        self.dataFrame = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''], self.sampleData[0]: ['']})
+        self.dataFrame = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''],
+                                       self.sampleData[0]: ['']})
         self.bus_num = bus_num
         self.bus = smbus2.SMBus(self.bus_num)
         self.address = address
@@ -46,7 +47,7 @@ class TMP102:
             print(f"Temperature: {temperature:.2f} °C")
 
             # Write data to CSV file
-            append_row_to_csv(self.csvFileLoc, timestamp, runtime, temperature)
+            append_row_to_csv(self.csvFileLoc, [timestamp, runtime, temperature])
 
             # Append data to Pandas DataFrame
             newData = pd.DataFrame({"Timestamp": [timestamp], "Runtime (s)": [runtime],self.sampleData[0]: [temperature]})

@@ -1,6 +1,6 @@
 from devices.scd30.driver import SCD30
 from dash import html, dcc, callback, Output, Input, ctx
-import plotly.express as px
+import plotly.express
 import pandas as pd
 
 SCD30_GRAPH_REFRESH_MS = 2000       # graph refresh rate (ms)
@@ -24,17 +24,21 @@ def startstop_sampling(start, stop):
             scd30_dev.resetProc()
         return 'Start recording', 'Recording stopped...'
     
-# Callback for updating graph based at fixed interval and on new x-asix selection
+# Callback for updating graphs based at fixed interval and on new x-asix selection
 @callback(
-    Output(component_id="scd30_graph", component_property="figure"),
+    [Output(component_id="scd30_co2", component_property="figure"),
+     Output(component_id="scd30_temp", component_property="figure"),
+     Output(component_id="scd30_rh", component_property="figure")],
     [Input(component_id="scd30_graph_refresh", component_property="n_intervals"),
      Input(component_id="scd30_dropdown", component_property="value")]
 )
 def update_graph(n_intervals, axisSeries):
     df = pd.DataFrame({'Timestamp': [''], 'Runtime (s)': [''], scd30_dev.sampleData[0]: ['']})
     df = pd.read_csv(scd30_dev.csvFileLoc)
-    fig = px.line(df, x=axisSeries, y=scd30_dev.sampleData, title="SCD30 Data")
-    return fig
+    fig1 = plotly.express.line(df, x=axisSeries, y=scd30_dev.sampleData[0], title="CO2 Concentration")
+    fig2 = plotly.express.line(df, x=axisSeries, y=scd30_dev.sampleData[1], title="Temperature")
+    fig3 = plotly.express.line(df, x=axisSeries, y=scd30_dev.sampleData[2], title="Relative Humidity")
+    return fig1, fig2, fig3
 
 @callback(
     Output("scd30_sample_rate", "value"),
@@ -48,12 +52,13 @@ def sync_input(sample_rate):
 scd30_layout = html.Div(children=[
     html.H1(" "),
     html.Div("Sampling Frequency", style={"font-size": "18px"}),
-    "CO2 Concentration ",
     dcc.Input(id="scd30_sample_rate", value = 2000, type="number", step=100), " ms",
     html.H1(" "),
     html.Button("Start recording", n_clicks=0, id="scd30_start_btn"),
     html.Button("Stop recording", n_clicks=0, id="scd30_stop_btn"),
-    dcc.Graph(figure={}, id="scd30_graph"),
+    dcc.Graph(figure={}, id="scd30_co2"),
+    dcc.Graph(figure={}, id="scd30_temp"),
+    dcc.Graph(figure={}, id="scd30_rh"),
     html.P("Select time axis:"),
     dcc.Dropdown(
         id="scd30_dropdown",
