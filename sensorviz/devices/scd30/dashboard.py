@@ -3,7 +3,7 @@ from dash import html, dcc, callback, Output, Input, ctx
 import plotly.express as px
 import pandas as pd
 
-SCD30_GRAPH_REFRESH_MS = 1000       # graph refresh rate (ms)
+SCD30_GRAPH_REFRESH_MS = 2000       # graph refresh rate (ms)
 scd30_dev = SCD30(dev_name="scd30-1")
 
 # Callback for starting stopping data capture, updating button text
@@ -49,7 +49,7 @@ scd30_layout = html.Div(children=[
     html.H1(" "),
     html.Div("Sampling Frequency", style={"font-size": "18px"}),
     "CO2 Concentration ",
-    dcc.Input(id="scd30_sample_rate", value = 1500, type="number", step=100), " ms",
+    dcc.Input(id="scd30_sample_rate", value = 2000, type="number", step=100), " ms",
     html.H1(" "),
     html.Button("Start recording", n_clicks=0, id="scd30_start_btn"),
     html.Button("Stop recording", n_clicks=0, id="scd30_stop_btn"),
